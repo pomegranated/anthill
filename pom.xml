@@ -5,7 +5,7 @@
 
   <groupId>com.pomegranated</groupId>
   <artifactId>anthill</artifactId>
-  <version>1.0</version>
+  <version>1.0.0</version>
   <name>anthill</name>
   <description>Independent SSE-based (Server Sent Event) notification library.</description>
 
