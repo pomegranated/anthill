@@ -1,7 +1,6 @@
 package com.pomegranated.anthill;
 
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -9,13 +8,30 @@ import reactor.core.publisher.FluxSink;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public final class Notifier<LOGIN_TYPE> {
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> scheduledFuture;
+
     @Getter
-    @Setter
     private boolean isHeartbeat = false;
+    public void setHeartbeat(boolean isHeartbeat) {
+        if (this.isHeartbeat == isHeartbeat) {
+            return;
+        }
+        this.isHeartbeat = isHeartbeat;
+        if (isHeartbeat) {
+            scheduledFuture = heartbeat();
+        }
+        else {
+            scheduledFuture.cancel(true);
+        }
+    }
 
     private final static String SESSION_ALREADY_EXISTS = "session already exists";
     private final static String SESSION_DOES_NOT_EXIST = "session does not exist";
@@ -29,19 +45,19 @@ public final class Notifier<LOGIN_TYPE> {
 
     public Notifier() {
         sessions = new ConcurrentHashMap<>();
-        heartbeat();
+        ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
     }
     public Notifier(int initCapacity) {
         sessions = new ConcurrentHashMap<>(initCapacity);
-        heartbeat();
+        ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
     }
     public Notifier(int initCapacity, float loadFactor) {
         sessions = new ConcurrentHashMap<>(initCapacity, loadFactor);
-        heartbeat();
+        ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
     }
     public Notifier(int initCapacity, float loadFactor, int concurrentLevel) {
         sessions = new ConcurrentHashMap<>(initCapacity, loadFactor, concurrentLevel);
-        heartbeat();
+        ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
     }
 
     public Flux<NotificationEvent<LOGIN_TYPE, ?>> createSessionByLogin(LOGIN_TYPE login) {
@@ -87,19 +103,15 @@ public final class Notifier<LOGIN_TYPE> {
         });
     }
 
-    private void heartbeat() {
-        Executors.newScheduledThreadPool(1).scheduleWithFixedDelay(
-                () -> {
-                    if (isHeartbeat) {
-                        sessions.forEach((k, v) -> v.next(
-                                NotificationEvent
-                                        .<LOGIN_TYPE, String>builder()
-                                        .login(k)
-                                        .notification(HEARTBEAT_MESSAGE)
-                                        .build()
-                        ));
-                    }
-                },
+    private ScheduledFuture<?> heartbeat() {
+        return scheduledExecutorService.scheduleWithFixedDelay(
+                () -> sessions.forEach((k, v) -> v.next(
+                        NotificationEvent
+                                .<LOGIN_TYPE, String>builder()
+                                .login(k)
+                                .notification(HEARTBEAT_MESSAGE)
+                                .build()
+                )),
                 24,
                 24,
                 TimeUnit.HOURS
