@@ -35,5 +35,5 @@ sendNotificationEventWithLogin(
 
 ## set heartbeat
 ```java
-notifier.isHeartbeat() ? notifier.setHeartbeat(false) : notifier.setHeartbeat(true);
+notifier.setHeartbeat(!notifier.isHeartbeat());
 ```
