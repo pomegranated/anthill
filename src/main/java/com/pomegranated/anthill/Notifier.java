@@ -15,28 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public final class Notifier<LOGIN_TYPE> {
-    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> scheduledFuture;
-
-    private long heartbeatInitialDelay = 24;
-    private long heartbeatDelay = 24;
-    private TimeUnit heartbeatUnit = TimeUnit.HOURS;
-
-    @Getter
-    private boolean isHeartbeat = false;
-    public void setHeartbeat(boolean isHeartbeat) {
-        if (this.isHeartbeat == isHeartbeat) {
-            return;
-        }
-        this.isHeartbeat = isHeartbeat;
-        if (isHeartbeat) {
-            scheduledFuture = heartbeat();
-        }
-        else {
-            scheduledFuture.cancel(true);
-        }
-    }
-
     public final static String REACTOR_ERROR = "reactor error";
     public final static String SESSION_ALREADY_EXISTS = "session already exists";
     public final static String SESSION_DOES_NOT_EXIST = "session does not exist";
@@ -47,14 +25,27 @@ public final class Notifier<LOGIN_TYPE> {
     public final static String VALIDATION_ERROR = "validation error";
 
     private final Map<LOGIN_TYPE, FluxSink<NotificationEvent<LOGIN_TYPE, ?>>> sessions;
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> scheduledFuture;
+    private final long heartbeatInitialDelay;
+    private final long heartbeatDelay;
+    private final TimeUnit heartbeatUnit;
+    @Getter
+    private boolean isHeartbeat = false;
 
     public Notifier() {
         sessions = new ConcurrentHashMap<>();
         ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
+        this.heartbeatInitialDelay = 24;
+        this.heartbeatDelay = 24;
+        this.heartbeatUnit = TimeUnit.HOURS;
     }
     public Notifier(int initCapacity, float loadFactor, int concurrentLevel) {
         sessions = new ConcurrentHashMap<>(initCapacity, loadFactor, concurrentLevel);
         ((ScheduledThreadPoolExecutor) scheduledExecutorService).setRemoveOnCancelPolicy(true);
+        this.heartbeatInitialDelay = 24;
+        this.heartbeatDelay = 24;
+        this.heartbeatUnit = TimeUnit.HOURS;
     }
     public Notifier(long heartbeatInitialDelay, long heartbeatDelay, TimeUnit heartbeatUnit) {
         sessions = new ConcurrentHashMap<>();
@@ -138,5 +129,18 @@ public final class Notifier<LOGIN_TYPE> {
                 heartbeatDelay,
                 heartbeatUnit
         );
+    }
+
+    public void setHeartbeat(boolean isHeartbeat) {
+        if (this.isHeartbeat == isHeartbeat) {
+            return;
+        }
+        this.isHeartbeat = isHeartbeat;
+        if (isHeartbeat) {
+            scheduledFuture = heartbeat();
+        }
+        else {
+            scheduledFuture.cancel(true);
+        }
     }
 }
