@@ -1,4 +1,4 @@
-package com.pomegranated.anthill.testing.integration.spring.controller;
+package com.pomegranated.anthill.controller;
 
 import com.pomegranated.anthill.NotificationEvent;
 import com.pomegranated.anthill.Notifier;

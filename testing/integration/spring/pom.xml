@@ -10,10 +10,8 @@
 	</parent>
 
 	<groupId>com.pomegranated</groupId>
-	<artifactId>spring-anthill-integration-testing</artifactId>
+	<artifactId>anthill-spring-integration-testing</artifactId>
 	<version>1.0.0</version>
-	<name>spring-anthill-integration-testing</name>
-	<description>Integration testing for notification library.</description>
 
 	<url/>
 	<licenses>
