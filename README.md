@@ -1,3 +1,14 @@
+# <span style="color:red">Warning!</span>
+<span style="color:red">At the moment, it only works with the reactive stack.</span>
+
+# Tested with
+| framework   | dependency                  |
+|:------------|:----------------------------|
+| Spring Boot | spring-boot-starter-webflux |
+
+# The most important issues
+- [add servlet stack support](https://github.com/pomegranated/anthill/issues/8)
+
 # How to use
 ## add Maven dependency
 ```xml
