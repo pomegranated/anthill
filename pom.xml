@@ -5,7 +5,7 @@
 
   <groupId>com.pomegranated</groupId>
   <artifactId>anthill</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>anthill</name>
   <description>Independent SSE-based (Server Sent Event) notification library.</description>
 
@@ -25,6 +25,14 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub pomegranated Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/pomegranated/anthill</url>
+    </repository>
+  </distributionManagement>
 
   <dependencies>
     <dependency>
